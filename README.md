@@ -5,9 +5,13 @@ Este repositório contém um script de automação desenvolvido para facilitar a
 # Tecnologias Utilizadas
 
 Python 3.x: Linguagem de programação utilizada para o desenvolvimento do script.
+
 Selenium: Biblioteca para automação de navegação no navegador, utilizada para interagir com o portal de relatórios.
+
 Pandas: Biblioteca poderosa para manipulação de dados em formato de tabelas (DataFrames), utilizada para editar, limpar e combinar planilhas.
+
 webdriver_manager: Biblioteca para facilitar o gerenciamento automático do driver do navegador (Edge Chromium).
+
 Datetime & Time: Módulos para manipulação de datas e controle de tempo no processo de automação.
 
 # Funcionalidades
