@@ -38,14 +38,18 @@ Após o download do relatório, o script utiliza a biblioteca Pandas para:
  
  4.4 Renomear colunas para garantir consistência entre as planilhas.
 
-5. Concatenação de Planilhas
+5. Concatenação de Planilhas:
+   
 O script carrega outra planilha pré-existente e concatena seus dados com o relatório de vendas gerado. Os dados são combinados de forma a manter a consistência e evitar duplicação.
 
-6. Organização de Arquivos
+6. Organização de Arquivos:
+   
 Os arquivos são organizados em pastas de acordo com o mês atual. Caso a pasta do mês seguinte não exista, o script cria a pasta automaticamente. O arquivo gerado é movido para a pasta correta, com base no mês da execução.
 
-7. Deleção de Arquivo Original
+7. Deleção de Arquivo Original:
+    
 Após a movimentação do arquivo para o destino correto, o script deleta o arquivo original de entrada (Listagem.xlsx), garantindo que o diretório de downloads seja limpo.
 
-8. Criação Automática de Pastas
+8. Criação Automática de Pastas:
+   
 O script garante que as pastas necessárias para armazenar os arquivos estejam sempre criadas, incluindo a criação de novas pastas para o mês seguinte, caso necessário.
