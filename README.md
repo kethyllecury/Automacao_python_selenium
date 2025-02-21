@@ -30,13 +30,13 @@ O relatório gerado é automaticamente exportado para o formato Excel e baixado 
 4. Processamento e Edição de Dados
 Após o download do relatório, o script utiliza a biblioteca Pandas para:
 
- Carregar o relatório em formato Excel.
+ 4.1 Carregar o relatório em formato Excel.
  
- Inserir a data do relatório na planilha.
+ 4.2 Inserir a data do relatório na planilha.
  
- Limpar dados desnecessários e garantir que a planilha contenha apenas dados válidos (por exemplo, remove linhas sem dados ou com códigos inválidos).
+ 4.3 Limpar dados desnecessários e garantir que a planilha contenha apenas dados válidos (por exemplo, remove linhas sem dados ou com códigos inválidos).
  
- Renomear colunas para garantir consistência entre as planilhas.
+ 4.4 Renomear colunas para garantir consistência entre as planilhas.
 
 5. Concatenação de Planilhas
 O script carrega outra planilha pré-existente e concatena seus dados com o relatório de vendas gerado. Os dados são combinados de forma a manter a consistência e evitar duplicação.
