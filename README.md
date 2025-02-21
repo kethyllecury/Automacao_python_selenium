@@ -31,8 +31,11 @@ O relatório gerado é automaticamente exportado para o formato Excel e baixado 
 Após o download do relatório, o script utiliza a biblioteca Pandas para:
 
  Carregar o relatório em formato Excel.
+ 
  Inserir a data do relatório na planilha.
+ 
  Limpar dados desnecessários e garantir que a planilha contenha apenas dados válidos (por exemplo, remove linhas sem dados ou com códigos inválidos).
+ 
  Renomear colunas para garantir consistência entre as planilhas.
 
 5. Concatenação de Planilhas
