@@ -123,7 +123,7 @@ def gerar_relatorio_vendas(driver, data):
 
     input_data_inicial = driver.find_element(By.XPATH, "(//dx-date-box//input[@class='dx-texteditor-input'])[1]")
     input_data_inicial.clear()
-    input_data_inicial.send_keys(data_corrigida) #chamar funcao aqui
+    input_data_inicial.send_keys(data_corrigida) 
 
     input_data_final = driver.find_element(By.XPATH, "(//dx-date-box//input[@class='dx-texteditor-input'])[2]")
     input_data_final.clear()
@@ -137,7 +137,7 @@ def gerar_relatorio_vendas(driver, data):
     time.sleep(8)
 
 
-def criar_pasta(data_anterior, mes_atual):
+def criar_pasta(data_anterior):
 
     if hoje.day == 1:
         
@@ -226,6 +226,17 @@ def concatenar_planilhas(vendas, df_outra_planilha, ultima_linha_df):
     for i, row in df_concatenado.iterrows():
         for j, value in enumerate(row):
             ws.cell(row=i+2, column=j+1, value=value)
+
+
+    time.sleep(180)
+
+    for row in range(2, len(df_concatenado) + 2): 
+        cell_l = ws[f'L{row}'] 
+        
+        if cell_l.value is None or cell_l.value == "": 
+            cell_l.value = f'=PROCV(C{row};Cardapio!B:J;8;0)'
+
+
     wb.save(caminho_arquivo)
 
     
