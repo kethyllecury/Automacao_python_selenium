@@ -236,6 +236,15 @@ def concatenar_planilhas(vendas, df_outra_planilha, ultima_linha_df):
         if cell_l.value is None or cell_l.value == "": 
             cell_l.value = f'=PROCV(C{row};Cardapio!B:J;8;0)'
 
+    time.sleep(15)
+
+    for row in range(2, len(df_concatenado) + 2): 
+        cell_m = ws[f'M{row}']
+
+        if cell_m.value is None or cell_m.value == "":  
+            cell_m.value = f'=PROCV(C{row};Cardapio!B:J;9;0)'
+
+
 
     wb.save(caminho_arquivo)
 
