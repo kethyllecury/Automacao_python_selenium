@@ -3,6 +3,7 @@ import time
 import pandas as pd
 from dotenv import load_dotenv
 from openpyxl import load_workbook
+from openpyxl.utils import get_column_letter
 from datetime import datetime, timedelta
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -76,6 +77,7 @@ def navegar_para_relatorios(driver):
 
 def verificar_fim_de_semana(data):
     data_obj = datetime.strptime(data, "%d-%m-%Y")
+    data = data_anterior
     
     if data_obj.weekday() == 0:  
         sexta = (data_obj - timedelta(days=3)).strftime("%d-%m-%Y")  
@@ -137,7 +139,7 @@ def gerar_relatorio_vendas(driver, data):
     time.sleep(8)
 
 
-def criar_pasta(data_anterior):
+def criar_pasta(data_anterior, mes_atual):
 
     if hoje.day == 1:
         
@@ -228,23 +230,13 @@ def concatenar_planilhas(vendas, df_outra_planilha, ultima_linha_df):
             ws.cell(row=i+2, column=j+1, value=value)
 
 
-    time.sleep(180)
+    time.sleep(120)
 
     for row in range(2, len(df_concatenado) + 2): 
-        cell_l = ws[f'L{row}'] 
-        
-        if cell_l.value is None or cell_l.value == "": 
-            cell_l.value = f'=PROCV(C{row};Cardapio!B:J;8;0)'
+        ws[f'L{row}'] = f'=VLOOKUP(C{row},Cardapio!B:J,8,0)'
+        ws[f'M{row}'] = f'=VLOOKUP(C{row},Cardapio!B:J,9,0)'
 
-    time.sleep(15)
-
-    for row in range(2, len(df_concatenado) + 2): 
-        cell_m = ws[f'M{row}']
-
-        if cell_m.value is None or cell_m.value == "":  
-            cell_m.value = f'=PROCV(C{row};Cardapio!B:J;9;0)'
-
-
+    time.sleep(60)
 
     wb.save(caminho_arquivo)
 
@@ -269,13 +261,3 @@ print("Processo concluído.")
 
 
 driver.quit()
-
-
-
-
-
-
-
-
-
-
