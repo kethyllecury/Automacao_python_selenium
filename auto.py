@@ -14,9 +14,15 @@ load_dotenv("cripto.env")
 
 dia_anterior = datetime.now() - timedelta(days=1)
 data_anterior = dia_anterior.strftime("%d-%m-%Y")
+
 hoje = datetime.today()
+
 mes_atual = datetime.today().strftime("%m-%Y")
+mes_anterior = hoje.replace(day=1) - timedelta(days=1)  # Vai para o último dia do mês anterior
+mes_anterior = mes_anterior.strftime("%m-%Y")
+
 data_atual = hoje.strftime("%d-%m-%Y")
+
 email = os.getenv("EMAIL")
 password = os.getenv("PASSWORD")
 
@@ -28,7 +34,7 @@ caminho_outra_planilha = fr"C:\Users\sigab\OneDrive\Driver - BPO\Caneca Fina\Fec
 caminho_arquivo = r"C:\Users\sigab\OneDrive\Driver - BPO\Caneca Fina\Fechamentos\12-2024\Vendas_Atualizado.xlsx"
 
 arquivo_original = os.path.join(pasta_downloads, "Listagem.xlsx")
-arquivo_novo = os.path.join(pasta_destino, f"{data_anterior}.xlsx")
+#arquivo_novo = os.path.join(pasta_destino, f"{data}.xlsx")
 
 def configurar_driver():
     edge_options = webdriver.EdgeOptions()
@@ -74,22 +80,37 @@ def navegar_para_relatorios(driver):
 
     driver.implicitly_wait(10)
 
+def criar_pasta(mes_anterior, mes_atual):
 
-def verificar_fim_de_semana(data):
-    data_obj = datetime.strptime(data, "%d-%m-%Y")
-    data = data_anterior
+    if mes_anterior != mes_atual:
+        
+        nova_pasta = os.path.join(pasta_base, mes_atual, "dia a dia")
+
+        if not os.path.exists(nova_pasta):
+            os.makedirs(nova_pasta)
+            print(f"Pasta criada: {nova_pasta}")
+        else:
+            print("A pasta já existe.")
+
+
+def verificar_fim_de_semana(data_atual):
+
+    data_obj = datetime.strptime(data_atual, "%d-%m-%Y")
+    print(f"Data fornecida: {data_atual}, Data convertida: {data_obj}")
+
+    data_anterior = (data_obj - timedelta(days=1)).strftime("%d-%m-%Y")
+    print(f"Data anterior: {data_anterior}")
     
     if data_obj.weekday() == 0:  
-        sexta = (data_obj - timedelta(days=3)).strftime("%d-%m-%Y")  
-        sabado = (data_obj - timedelta(days=2)).strftime("%d-%m-%Y") 
-        return [sexta, sabado, data]  
-    
-    return [data]
+        sexta = (data_obj - timedelta(days=3)).strftime("%d-%m-%Y")
+        sabado = (data_obj - timedelta(days=2)).strftime("%d-%m-%Y")
+        print(f"Segunda-feira detectada, retornando sexta e sábado: {sexta}, {sabado}")
+        return [sexta, sabado, data_anterior]
+    else:
+        return [data_anterior]
 
 
-def gerar_relatorio_vendas(driver, data):
-
-    data_corrigida = verificar_fim_de_semana(data)
+def gerar_relatorio_vendas(driver):
 
     vendas_link = driver.find_element(By.XPATH, "//a[contains(text(), '01 - Vendas')]")
 
@@ -123,13 +144,15 @@ def gerar_relatorio_vendas(driver, data):
     if checkbox3.is_displayed() and checkbox3.is_enabled():
         checkbox3.click()
 
+def selecionar_data(data):
+
     input_data_inicial = driver.find_element(By.XPATH, "(//dx-date-box//input[@class='dx-texteditor-input'])[1]")
     input_data_inicial.clear()
-    input_data_inicial.send_keys(data_corrigida) 
+    input_data_inicial.send_keys(data) 
 
     input_data_final = driver.find_element(By.XPATH, "(//dx-date-box//input[@class='dx-texteditor-input'])[2]")
     input_data_final.clear()
-    input_data_final.send_keys(data_corrigida)
+    input_data_final.send_keys(data)
 
     botao_excel = driver.find_element(By.XPATH, "//div[@class='dx-button-content']//i[@class='dx-icon dx-icon-export-excel-button']")
 
@@ -138,37 +161,46 @@ def gerar_relatorio_vendas(driver, data):
 
     time.sleep(8)
 
-
-def criar_pasta(data_anterior, mes_atual):
-
-    if hoje.day == 1:
-        
-        mes_anterior = hoje.replace(day=1) - timedelta(days=1)
-
-    
-        proximo_mes = mes_anterior.replace(day=28) + timedelta(days=4)  
-        proximo_mes = proximo_mes.replace(day=1) 
-
-        nova_pasta = os.path.join(pasta_base, proximo_mes.strftime("%m-%Y"), "dia a dia")
-
-    
-        if not os.path.exists(nova_pasta):
-            os.makedirs(nova_pasta)
-            print(f"Pasta criada: {nova_pasta}")
-        else:
-            print("A pasta já existe.")
-
+def obter_pasta_destino(data, mes_atual, mes_anterior):
    
+    mes_data = datetime.strptime(data, "%d-%m-%Y").strftime("%m-%Y")
+
+    print(f"Data fornecida: {data}")
+    print(f"mes_atual: {mes_atual}")
+    print(f"mes_anterior: {mes_anterior}")
+    print(f"mes_data: {mes_data}")
+
+
+    if mes_data == mes_atual:
+        pasta_destino = f"C:\\Users\\sigab\\OneDrive\\Driver - BPO\\Caneca Fina\\Fechamentos\\{mes_atual}\\dia a dia"
+        caminho_outra_planilha = fr"C:\Users\sigab\OneDrive\Driver - BPO\Caneca Fina\Fechamentos\{mes_atual}\dia a dia\{data}.xlsx"
+    else:
+        pasta_destino = f"C:\\Users\\sigab\\OneDrive\\Driver - BPO\\Caneca Fina\\Fechamentos\\{mes_anterior}\\dia a dia"
+        caminho_outra_planilha = fr"C:\Users\sigab\OneDrive\Driver - BPO\Caneca Fina\Fechamentos\{mes_anterior}\dia a dia\{data}.xlsx"
+
+    return pasta_destino, caminho_outra_planilha
+
+def criar_excel(data, pasta_destino, arquivo_original):
+
+    global caminho_outra_planilha
+
     if os.path.exists(arquivo_original):
         print("Arquivo encontrado!")
         df = pd.read_excel(arquivo_original)
-        df.insert(0, "Data", data_anterior)
+        df.insert(0, "Data", data)
         df = df[df["Código"].astype(str).str.isnumeric()]
         df = df.dropna(subset=['Nome']) 
 
         print(df)
-    
+
+        pasta_destino, caminho_outra_planilha = obter_pasta_destino(data, mes_atual, mes_anterior)
+
+        arquivo_novo = os.path.join(pasta_destino, f"{data}.xlsx")
+        
         df.to_excel(arquivo_novo, index=False)
+
+        
+    
     else:
         print("Arquivo NÃO encontrado. Verifique o caminho.")
 
@@ -181,12 +213,17 @@ def deletar_arquivo():
     else:
         print("O arquivo Listagem.xlsx não foi encontrado.")
 
-def editar_planilhas(caminho_arquivo, caminho_outra_planilha):
+def editar_planilhas(caminho_outra_planilha):
 
     global planilha
     global vendas
     global df_outra_planilha
     global ultima_linha_df
+    global pasta_destino
+
+    pasta_destino, caminho_outra_planilha = obter_pasta_destino(data, mes_atual, mes_anterior)
+    print(caminho_outra_planilha)
+    print("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
 
     print("Carregando planilhas...")
 
@@ -215,7 +252,7 @@ def editar_planilhas(caminho_arquivo, caminho_outra_planilha):
     print(f"Última linha válida na aba 'Vendas': {ultima_linha_df}")
 
 
-def concatenar_planilhas(vendas, df_outra_planilha, ultima_linha_df):
+def concatenar_planilhas(caminho_arquivo, vendas, df_outra_planilha, ultima_linha_df):
 
     df_concatenado = pd.concat([vendas.iloc[: ultima_linha_df], df_outra_planilha], ignore_index=True)
 
@@ -230,7 +267,7 @@ def concatenar_planilhas(vendas, df_outra_planilha, ultima_linha_df):
             ws.cell(row=i+2, column=j+1, value=value)
 
 
-    time.sleep(120)
+    time.sleep(60)
 
     for row in range(2, len(df_concatenado) + 2): 
         ws[f'L{row}'] = f'=VLOOKUP(C{row},Cardapio!B:J,8,0)'
@@ -247,15 +284,17 @@ realizar_login(driver)
 navegar_para_relatorios(driver)
 
 datas_para_processar = verificar_fim_de_semana(data_atual)
+gerar_relatorio_vendas(driver)
 
 for data in datas_para_processar:
     print(f"Iniciando o processamento para a data: {data}")
-    
-    gerar_relatorio_vendas(driver, data) 
+   
+    selecionar_data(data)
     criar_pasta(data, mes_atual)  
+    criar_excel(data, pasta_destino, arquivo_original)
     deletar_arquivo() 
-    editar_planilhas(caminho_arquivo, caminho_outra_planilha)  
-    concatenar_planilhas(vendas, df_outra_planilha, ultima_linha_df)
+    editar_planilhas(caminho_outra_planilha)  
+    concatenar_planilhas(caminho_arquivo,vendas, df_outra_planilha, ultima_linha_df)
 
 print("Processo concluído.")
 
