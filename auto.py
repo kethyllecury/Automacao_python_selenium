@@ -18,14 +18,13 @@ data_anterior = dia_anterior.strftime("%d-%m-%Y")
 hoje = datetime.today()
 
 mes_atual = datetime.today().strftime("%m-%Y")
-mes_anterior = hoje.replace(day=1) - timedelta(days=1)  # Vai para o último dia do mês anterior
+mes_anterior = hoje.replace(day=1) - timedelta(days=1)  
 mes_anterior = mes_anterior.strftime("%m-%Y")
 
 data_atual = hoje.strftime("%d-%m-%Y")
 
 email = os.getenv("EMAIL")
 password = os.getenv("PASSWORD")
-
 
 pasta_downloads = r"C:\Users\sigab\Downloads"
 pasta_destino = f"C:\\Users\\sigab\\OneDrive\\Driver - BPO\\Caneca Fina\\Fechamentos\\{mes_atual}\\dia a dia"
@@ -34,7 +33,6 @@ caminho_outra_planilha = fr"C:\Users\sigab\OneDrive\Driver - BPO\Caneca Fina\Fec
 caminho_arquivo = r"C:\Users\sigab\OneDrive\Driver - BPO\Caneca Fina\Fechamentos\12-2024\Vendas_Atualizado.xlsx"
 
 arquivo_original = os.path.join(pasta_downloads, "Listagem.xlsx")
-#arquivo_novo = os.path.join(pasta_destino, f"{data}.xlsx")
 
 def configurar_driver():
     edge_options = webdriver.EdgeOptions()
@@ -53,7 +51,6 @@ def configurar_driver():
 def realizar_login(driver):
     driver.get("https://portal.netcontroll.com.br/#/auth/login")
 
-
     time.sleep(3)
 
     email_field = driver.find_element(By.ID, "email")  
@@ -62,11 +59,8 @@ def realizar_login(driver):
     password_field = driver.find_element(By.ID, "password")  
     password_field.send_keys(password)  
 
-
-
     login_button = driver.find_element(By.XPATH, "//button[contains(text(), 'Login')]")
     login_button.click()
-
 
     time.sleep(5)
 
@@ -74,9 +68,7 @@ def navegar_para_relatorios(driver):
 
     relatorios_link = driver.find_element(By.XPATH, "//a[@routerlink='/relatorio']")
 
-
     relatorios_link.click()
-
 
     driver.implicitly_wait(10)
 
@@ -91,7 +83,6 @@ def criar_pasta(mes_anterior, mes_atual):
             print(f"Pasta criada: {nova_pasta}")
         else:
             print("A pasta já existe.")
-
 
 def verificar_fim_de_semana(data_atual):
 
@@ -109,27 +100,21 @@ def verificar_fim_de_semana(data_atual):
     else:
         return [data_anterior]
 
-
 def gerar_relatorio_vendas(driver):
 
     vendas_link = driver.find_element(By.XPATH, "//a[contains(text(), '01 - Vendas')]")
 
-
     vendas_link.click()
-
 
     driver.implicitly_wait(10)
 
     produtos_link = driver.find_element(By.XPATH, "//a[contains(text(), '101-Produtos')]")
 
-
     produtos_link.click()
-
 
     driver.implicitly_wait(10)
 
     checkbox1 = driver.find_element(By.XPATH, "//label[contains(text(), 'Exibir preço e custo (Atual)')]")
-
 
     if checkbox1.is_displayed() and checkbox1.is_enabled():
         checkbox1.click()
@@ -156,7 +141,6 @@ def selecionar_data(data):
 
     botao_excel = driver.find_element(By.XPATH, "//div[@class='dx-button-content']//i[@class='dx-icon dx-icon-export-excel-button']")
 
-
     botao_excel.click()
 
     time.sleep(8)
@@ -169,7 +153,6 @@ def obter_pasta_destino(data, mes_atual, mes_anterior):
     print(f"mes_atual: {mes_atual}")
     print(f"mes_anterior: {mes_anterior}")
     print(f"mes_data: {mes_data}")
-
 
     if mes_data == mes_atual:
         pasta_destino = f"C:\\Users\\sigab\\OneDrive\\Driver - BPO\\Caneca Fina\\Fechamentos\\{mes_atual}\\dia a dia"
@@ -199,8 +182,6 @@ def criar_excel(data, pasta_destino, arquivo_original):
         
         df.to_excel(arquivo_novo, index=False)
 
-        
-    
     else:
         print("Arquivo NÃO encontrado. Verifique o caminho.")
 
@@ -223,8 +204,7 @@ def editar_planilhas(caminho_outra_planilha):
 
     pasta_destino, caminho_outra_planilha = obter_pasta_destino(data, mes_atual, mes_anterior)
     print(caminho_outra_planilha)
-    print("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
-
+    
     print("Carregando planilhas...")
 
     planilha = pd.read_excel(caminho_arquivo, sheet_name=None)
@@ -251,7 +231,6 @@ def editar_planilhas(caminho_outra_planilha):
     ultima_linha_df = vendas['Data Venda'].last_valid_index() + 1
     print(f"Última linha válida na aba 'Vendas': {ultima_linha_df}")
 
-
 def concatenar_planilhas(caminho_arquivo, vendas, df_outra_planilha, ultima_linha_df):
 
     df_concatenado = pd.concat([vendas.iloc[: ultima_linha_df], df_outra_planilha], ignore_index=True)
@@ -266,7 +245,6 @@ def concatenar_planilhas(caminho_arquivo, vendas, df_outra_planilha, ultima_linh
         for j, value in enumerate(row):
             ws.cell(row=i+2, column=j+1, value=value)
 
-
     time.sleep(60)
 
     for row in range(2, len(df_concatenado) + 2): 
@@ -277,26 +255,31 @@ def concatenar_planilhas(caminho_arquivo, vendas, df_outra_planilha, ultima_linh
 
     wb.save(caminho_arquivo)
 
-    
-
 driver = configurar_driver()
+
 realizar_login(driver)
+
 navegar_para_relatorios(driver)
 
 datas_para_processar = verificar_fim_de_semana(data_atual)
+
 gerar_relatorio_vendas(driver)
 
 for data in datas_para_processar:
     print(f"Iniciando o processamento para a data: {data}")
    
     selecionar_data(data)
+
     criar_pasta(data, mes_atual)  
+
     criar_excel(data, pasta_destino, arquivo_original)
+
     deletar_arquivo() 
+
     editar_planilhas(caminho_outra_planilha)  
+
     concatenar_planilhas(caminho_arquivo,vendas, df_outra_planilha, ultima_linha_df)
 
 print("Processo concluído.")
-
 
 driver.quit()
